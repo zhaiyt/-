@@ -3,7 +3,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<stdbool.h>
-unsigned int csize;
+unsigned int csize = 0;
 unsigned int fsize;
 //选择题链表
 typedef struct choice {
@@ -18,8 +18,6 @@ typedef struct choice {
 }Choice;
 //链接选择题节点
 typedef struct list_coice {
-
-
 	Choice* head;
 	Choice* tail;
 }List_choice;
@@ -30,14 +28,11 @@ typedef struct fill {
 	char answer[1000];   //答案 
 	struct fill* next;
 }Fill;
-List_choice* Clist;
-
+List_choice pchoice;
 //打印菜单
 int print_menu();
 //读取文件
 void read_file();
-//添加一个新的选择题节点
-List_choice* CreateNode(void* input);
 //将新的选择题节点插入
 List_choice* ListInsert(List_choice* p, Choice* new);
 //将选择题存储进文件
@@ -48,14 +43,12 @@ void add_choice(List_choice* pchoice);
 void add_fill();
 int main()
 {
-	csize = 0;
-	List_choice pchoice;
 	pchoice.head = pchoice.tail = NULL;
 	while (true) {
 		switch (print_menu())
 		{
 		case 0:
-			break;
+			return 0;
 		case 1:
 		{
 			printf("1.选择题 2.填空题:");
@@ -110,20 +103,6 @@ int print_menu()
 	scanf("%d", &num);
 	return num;
 }
-List_choice* CreateNode(void* input)
-{
-	List_choice* p = (List_choice*)malloc(sizeof(List_choice));
-	if (p == NULL) {
-		printf("malloc ERROR!\n");
-		return NULL;
-	}
-	// 初始化内存空间为0，确保成员变量初始状态正确
-	memset(p, 0, sizeof(List_choice));
-	// 这里input暂时未用到，可根据后续拓展需求来处理，目前先按原逻辑保持
-	p->head = NULL;
-	p->tail = NULL;
-	return p;
-}
 List_choice* ListInsert(List_choice* p, Choice* new)
 {
 	if (p == NULL) {
@@ -148,11 +127,9 @@ void read_file()
 		printf("读取选择题题库发生错误");
 		return;
 	}//load
-	Clist = CreateNode(NULL);
-	List_choice* C = Clist;
 	while (1) {
 		char buffer[1000];
-		Choice* c = (Choice*)malloc(sizeof(Choice));
+		Choice* c = malloc(sizeof(Choice));
 		if (c == NULL)
 		{
 			printf("指针不存在");
@@ -171,11 +148,10 @@ void read_file()
 		fgets(buffer, sizeof(buffer), choicefile);
 		strcpy(c->D, buffer);
 		c->answer = fgetc(choicefile);
-		Clist = ListInsert(Clist, c);
+		ListInsert(&pchoice, c);
 		csize = c->id;
 	}
 	fclose(choicefile);
-	Clist = C;
 }
 void add_choice_file(Choice* node)
 {
@@ -201,7 +177,7 @@ void add_choice_file(Choice* node)
 void add_choice(List_choice* pchoice)
 {
 	//为一个选择题节点动态分配内存
-	Choice* node = (Choice*)malloc(sizeof(Choice));
+	Choice* node = malloc(sizeof(Choice));
 	if (!node) {
 		printf("malloc failed\n");
 		return;
